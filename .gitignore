@@ -191,6 +191,15 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,git
 
+### PRD ###
+prd/**/*.jpg
+prd/**/*.jpeg
+prd/**/*.png
+prd/**/*.gif
+prd/**/*.webp
+prd/**/*.mp4
+prd/**/*.mov
+
 ### Wrangler ###
 .wrangler/
 .env*
