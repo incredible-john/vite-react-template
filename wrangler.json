@@ -17,5 +17,11 @@
 		"database_name": "juolingo-db",
 		"database_id": "d8922ab1-d52c-4d37-ac19-a6cc151664b2",
 		"migrations_dir": "drizzle"
-	}]
+	}],
+	"r2_buckets": [
+		{
+		"binding": "VOICE_BUCKET",
+		"bucket_name": "juolingo-voice"
+		}
+	]
 }
