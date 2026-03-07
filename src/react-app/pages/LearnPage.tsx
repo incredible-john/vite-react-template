@@ -9,6 +9,7 @@ import { FillBlankChallenge, getFillBlankCorrectAnswer } from "@/components/lear
 import { MatchPairsChallenge, getMatchPairsCorrectAnswer } from "@/components/learn/MatchPairsChallenge";
 import { SelectTranslationChallenge, getSelectTranslationCorrectAnswer } from "@/components/learn/SelectTranslationChallenge";
 import { MobileShell } from "@/components/layout/MobileShell";
+import { playCorrectSound, playIncorrectSound } from "@/lib/sounds";
 
 const MAX_HEARTS = 5;
 
@@ -57,7 +58,10 @@ export function LearnPage() {
 			const correct = checkAnswer(current, answer);
 			setIsCorrect(correct);
 			setAnswered(true);
-			if (!correct) {
+			if (correct) {
+				playCorrectSound();
+			} else {
+				playIncorrectSound();
 				setHearts((h) => Math.max(0, h - 1));
 			}
 		},

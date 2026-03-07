@@ -24,8 +24,8 @@ INSERT INTO lessons (id, unit_id, title, "order") VALUES
   (1, 1, 'Early Life', 0);
 
 -- Challenge 1: Translate "Hello, I am Anna."
-INSERT INTO challenges (id, lesson_id, type, question, "order") VALUES
-  (1, 1, 'TRANSLATE', 'Hello, I am Beethoven.', 0);
+INSERT INTO challenges (id, lesson_id, type, question, audio_url, "order") VALUES
+  (1, 1, 'TRANSLATE', 'Hello, I am Beethoven.', 'ElevenLabs_2026-03-07T08_32_39_Rachel_pre_sp100_s50_sb75_se0_b_m2.mp3', 0);
 
 INSERT INTO challenge_options (challenge_id, text, is_correct, "order") VALUES
   (1, '你好', 1, 0),

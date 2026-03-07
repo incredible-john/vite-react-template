@@ -209,3 +209,6 @@ prd/**/*.mov
 
 ### Cursor ###
 .cursor/
+
+### Asset 音效资源等 ###
+.asset/
