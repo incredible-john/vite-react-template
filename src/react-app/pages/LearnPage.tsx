@@ -13,6 +13,13 @@ import { playCorrectSound, playIncorrectSound } from "@/lib/sounds";
 
 const MAX_HEARTS = 5;
 
+type QueueItem = {
+	challenge: Challenge;
+	done: boolean;
+	/** unique key per attempt, used to force re-mount on retry */
+	key: number;
+};
+
 function getCorrectAnswer(challenge: Challenge): string {
 	switch (challenge.type) {
 		case "TRANSLATE":
@@ -31,11 +38,14 @@ function checkAnswer(challenge: Challenge, answer: string): boolean {
 	return answer === correct;
 }
 
+let keyCounter = 0;
+
 export function LearnPage() {
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const [lesson, setLesson] = useState<LessonWithChallenges | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [queue, setQueue] = useState<QueueItem[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [hearts, setHearts] = useState(MAX_HEARTS);
 	const [answered, setAnswered] = useState(false);
@@ -44,39 +54,61 @@ export function LearnPage() {
 	useEffect(() => {
 		if (!id) return;
 		getLesson(Number(id))
-			.then(setLesson)
+			.then((data) => {
+				setLesson(data);
+				const challenges = data?.challenges ?? [];
+				setQueue(challenges.map((c) => ({ challenge: c, done: false, key: keyCounter++ })));
+			})
 			.finally(() => setLoading(false));
 	}, [id]);
 
-	const challenges = lesson?.challenges ?? [];
-	const current = challenges[currentIndex] as Challenge | undefined;
-	const progress = challenges.length > 0 ? currentIndex / challenges.length : 0;
+	useEffect(() => {
+		if (!loading && queue.length > 0 && currentIndex >= queue.length) {
+			navigate(-1);
+		}
+	}, [queue.length, currentIndex, loading, navigate]);
+
+	const currentItem = queue[currentIndex] as QueueItem | undefined;
+	const current = currentItem?.challenge;
+
+	// 进度 = 已完成数 / 总数，在 handleAnswer 时就已更新，点击 Continue 不会引起变化
+	const completedCount = queue.filter((item) => item.done).length;
+	const progress = queue.length > 0 ? completedCount / queue.length : 0;
 
 	const handleAnswer = useCallback(
 		(answer: string) => {
-			if (!current) return;
+			if (!currentItem || !current) return;
 			const correct = checkAnswer(current, answer);
 			setIsCorrect(correct);
 			setAnswered(true);
 			if (correct) {
 				playCorrectSound();
+				// 答对：标记为完成，进度推进
+				setQueue((prev) =>
+					prev.map((item) =>
+						item.key === currentItem.key ? { ...item, done: true } : item
+					)
+				);
 			} else {
 				playIncorrectSound();
 				setHearts((h) => Math.max(0, h - 1));
+				// 答错：标记为完成并追加副本到队尾，进度以新总数为分母推进
+				setQueue((prev) => {
+					const updated = prev.map((item) =>
+						item.key === currentItem.key ? { ...item, done: true } : item
+					);
+					return [...updated, { challenge: currentItem.challenge, done: false, key: keyCounter++ }];
+				});
 			}
 		},
-		[current]
+		[current, currentItem]
 	);
 
 	const handleContinue = useCallback(() => {
-		if (currentIndex + 1 >= challenges.length) {
-			navigate(-1);
-			return;
-		}
 		setCurrentIndex((i) => i + 1);
 		setAnswered(false);
 		setIsCorrect(false);
-	}, [currentIndex, challenges.length, navigate]);
+	}, []);
 
 	if (loading) {
 		return (
@@ -88,7 +120,7 @@ export function LearnPage() {
 		);
 	}
 
-	if (!lesson || challenges.length === 0) {
+	if (!lesson || queue.length === 0) {
 		return (
 			<MobileShell>
 				<div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
@@ -130,8 +162,8 @@ export function LearnPage() {
 				maxHearts={MAX_HEARTS}
 			/>
 
-			{current && (
-				<div className="flex-1 flex flex-col" key={current.id}>
+			{current && currentItem && (
+				<div className="flex-1 flex flex-col" key={currentItem.key}>
 					{current.type === "TRANSLATE" && (
 						<TranslateChallenge
 							challenge={current}
