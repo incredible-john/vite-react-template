@@ -26,7 +26,7 @@
 	],
 	"routes": [
 		{
-			"pattern": "zhonglinguo.com",
+			"pattern": "zhonglinguo.top",
 			"custom_domain": true
 		}
 	]
