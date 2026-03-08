@@ -23,5 +23,11 @@
 		"binding": "VOICE_BUCKET",
 		"bucket_name": "juolingo-voice"
 		}
+	],
+	"routes": [
+		{
+			"pattern": "zhonglinguo.com",
+			"custom_domain": true
+		}
 	]
 }
