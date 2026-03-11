@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { playTts } from "@/lib/sounds";
 
 interface InteractiveWordProps {
 	word: string;
@@ -11,20 +12,13 @@ export function InteractiveWord({ word, className }: InteractiveWordProps) {
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [playing, setPlaying] = useState(false);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 	const tooltipRef = useRef<HTMLDivElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	const handleClick = async (e: React.MouseEvent) => {
 		e.stopPropagation();
-		// Play TTS audio
-		if (audioRef.current) {
-			audioRef.current.pause();
-		}
-		const audio = new Audio(`/api/audio/tts?text=${encodeURIComponent(word)}`);
-		audioRef.current = audio;
-
-		audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+		const audio = playTts(`/api/audio/tts?text=${encodeURIComponent(word)}`);
+		setPlaying(true);
 		audio.addEventListener("ended", () => setPlaying(false));
 		audio.addEventListener("error", () => setPlaying(false));
 

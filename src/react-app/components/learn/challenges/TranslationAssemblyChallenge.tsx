@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import type { Challenge } from "@/lib/types";
 import { AudioButton } from "../AudioButton";
 import { InteractiveWord } from "../InteractiveWord";
 import { WordTile } from "../WordTile";
 import { CheckButton } from "./CheckButton";
+import { playTts, stopTts } from "@/lib/sounds";
 
 interface TranslationAssemblyChallengeProps {
 	challenge: Challenge;
@@ -43,24 +44,24 @@ function parseWords(text: string): Array<{ type: "word" | "space"; value: string
 
 export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: TranslationAssemblyChallengeProps) {
 	const [selected, setSelected] = useState<number[]>([]);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	const options = challenge.options;
 
+	// Shuffle options for display
+	const shuffledOptions = useMemo(() => {
+		const arr = [...challenge.options];
+		for (let i = arr.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[arr[i], arr[j]] = [arr[j], arr[i]];
+		}
+		return arr;
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [challenge.id]);
+
 	// Auto-play question audio on mount
 	useEffect(() => {
-		const playAudio = () => {
-			if (audioRef.current) {
-				audioRef.current.pause();
-			}
-			const url = `/api/audio/tts?text=${encodeURIComponent(challenge.question)}`;
-			audioRef.current = new Audio(url);
-			audioRef.current.play().catch(() => {});
-		};
-		playAudio();
-		return () => {
-			audioRef.current?.pause();
-		};
+		playTts(`/api/audio/tts?text=${encodeURIComponent(challenge.question)}`);
+		return () => stopTts();
 	}, [challenge.question]);
 
 	// Render text with interactive words
@@ -131,12 +132,12 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 			{/* Word bank */}
 			<div className="px-6 flex-1">
 				<div className="flex flex-wrap gap-2 justify-center">
-					{options.map((opt, idx) => (
+					{shuffledOptions.map((opt) => (
 						<WordTile
 							key={opt.id}
 							text={opt.text}
-							selected={selected.includes(idx)}
-							onClick={() => handleSelectFromBank(idx)}
+							selected={selected.includes(opt.order)}
+							onClick={() => handleSelectFromBank(opt.order)}
 							disabled={answered}
 						/>
 					))}

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { Challenge } from "@/lib/types";
 import { AudioButton } from "../AudioButton";
 import { InteractiveWord } from "../InteractiveWord";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
+import { playTts, stopTts } from "@/lib/sounds";
 
 interface FillBlankChallengeProps {
 	challenge: Challenge;
@@ -23,25 +24,14 @@ function parseWords(text: string): Array<{ type: "word" | "space"; value: string
 
 export function FillBlankChallenge({ challenge, onAnswer, answered }: FillBlankChallengeProps) {
 	const [selectedId, setSelectedId] = useState<number | null>(null);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	const parts = challenge.question.split("___");
 	const selectedOption = challenge.options.find((o) => o.id === selectedId);
 
 	// Auto-play question audio on mount
 	useEffect(() => {
-		const playAudio = () => {
-			if (audioRef.current) {
-				audioRef.current.pause();
-			}
-			const url = `/api/audio/tts?text=${encodeURIComponent(challenge.question)}`;
-			audioRef.current = new Audio(url);
-			audioRef.current.play().catch(() => {});
-		};
-		playAudio();
-		return () => {
-			audioRef.current?.pause();
-		};
+		playTts(`/api/audio/tts?text=${encodeURIComponent(challenge.question)}`);
+		return () => stopTts();
 	}, [challenge.question]);
 
 	// Render text with interactive words
