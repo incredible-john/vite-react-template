@@ -1,4 +1,4 @@
-import type { Subject, UnitWithLessons, LessonWithChallenges, Challenge, ChallengeOption, ChallengeToken } from "./types";
+import type { Subject, UnitWithLessons, LessonWithChallenges, Challenge, ChallengeOption } from "./types";
 
 const BASE = "/api";
 
