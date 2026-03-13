@@ -12,7 +12,7 @@ import { LessonComplete } from "@/components/learn/LessonComplete";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { playCorrectSound, playIncorrectSound } from "@/lib/sounds";
 
-const MAX_HEARTS = 999;
+const MAX_HEARTS = 5;
 
 type QueueItem = {
 	challenge: Challenge;
@@ -48,7 +48,8 @@ export function LearnPage() {
 	const [loading, setLoading] = useState(true);
 	const [queue, setQueue] = useState<QueueItem[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
-	const [hearts, setHearts] = useState(MAX_HEARTS);
+	// 暂时解除红心限制：不扣心，始终视为满心
+	const hearts = MAX_HEARTS;
 	const [answered, setAnswered] = useState(false);
 	const [isCorrect, setIsCorrect] = useState(false);
 	const [isComplete, setIsComplete] = useState(false);
@@ -94,8 +95,7 @@ export function LearnPage() {
 				);
 			} else {
 				playIncorrectSound();
-				setHearts((h) => Math.max(0, h - 1));
-				// 答错：标记为完成并追加副本到队尾，进度以新总数为分母推进
+				// 答错：标记为完成并追加副本到队尾，进度以新总数为分母推进（红心限制已暂时解除）
 				setQueue((prev) => {
 					const updated = prev.map((item) =>
 						item.key === currentItem.key ? { ...item, done: true } : item
@@ -139,23 +139,24 @@ export function LearnPage() {
 		);
 	}
 
-	if (hearts <= 0) {
-		return (
-			<MobileShell>
-				<div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-					<div className="text-6xl mb-4">💔</div>
-					<h2 className="text-2xl font-bold mb-2">Out of hearts!</h2>
-					<p className="text-muted-foreground mb-6">Better luck next time.</p>
-					<button
-						onClick={() => navigate(-1)}
-						className="px-8 py-3 rounded-2xl bg-duo-green text-white font-bold border-b-4 border-duo-green-dark"
-					>
-						Go back
-					</button>
-				</div>
-			</MobileShell>
-		);
-	}
+	// 暂时解除红心限制：不再因红心用尽而结束课程
+	// if (hearts <= 0) {
+	// 	return (
+	// 		<MobileShell>
+	// 			<div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+	// 				<div className="text-6xl mb-4">💔</div>
+	// 				<h2 className="text-2xl font-bold mb-2">Out of hearts!</h2>
+	// 				<p className="text-muted-foreground mb-6">Better luck next time.</p>
+	// 				<button
+	// 					onClick={() => navigate(-1)}
+	// 					className="px-8 py-3 rounded-2xl bg-duo-green text-white font-bold border-b-4 border-duo-green-dark"
+	// 				>
+	// 					Go back
+	// 				</button>
+	// 			</div>
+	// 		</MobileShell>
+	// 	);
+	// }
 
 	if (isComplete) {
 		return (
