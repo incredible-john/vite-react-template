@@ -12,7 +12,7 @@ import { LessonComplete } from "@/components/learn/LessonComplete";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { playCorrectSound, playIncorrectSound } from "@/lib/sounds";
 
-const MAX_HEARTS = 5;
+const MAX_HEARTS = 999;
 
 type QueueItem = {
 	challenge: Challenge;
