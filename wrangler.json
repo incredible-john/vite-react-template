@@ -25,8 +25,7 @@
 		}
 	],
 	"vars": {
-		"BAIDU_APP_ID": "20260310002569731",
-		"VITE_CLERK_PUBLISHABLE_KEY": "pk_test_dG9nZXRoZXItbW9jY2FzaW4tNTUuY2xlcmsuYWNjb3VudHMuZGV2JA"
+		"BAIDU_APP_ID": "20260310002569731"
 	},
 	"routes": [
 		{
