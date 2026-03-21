@@ -1,8 +1,8 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import type { Challenge, ChallengeOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
-import { playIncorrectSound } from "@/lib/sounds";
+import { playIncorrectSound, playTts } from "@/lib/sounds";
 
 interface MatchPairsChallengeProps {
 	challenge: Challenge;
@@ -18,22 +18,11 @@ interface Pair {
 // Check if text contains Chinese characters
 const isChinese = (text: string): boolean => /[\u4e00-\u9fa5]/.test(text);
 
-// Play audio for a given text
-const playWordAudio = (text: string, audioRef: React.RefObject<HTMLAudioElement | null>) => {
-	if (audioRef.current) {
-		audioRef.current.pause();
-	}
-	const audio = new Audio(`/api/audio/tts?text=${encodeURIComponent(text)}`);
-	audioRef.current = audio;
-	audio.play().catch(() => {});
-};
-
 export function MatchPairsChallenge({ challenge, onAnswer, answered }: MatchPairsChallengeProps) {
 	const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
 	const [selectedRight, setSelectedRight] = useState<number | null>(null);
 	const [matchedPairs, setMatchedPairs] = useState<Pair[]>([]);
 	const [errorPair, setErrorPair] = useState<{ leftId: number; rightId: number } | null>(null);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	// Separate Chinese (left) and English (right) options
 	const { chineseItems, englishItems } = useMemo(() => {
@@ -80,7 +69,7 @@ export function MatchPairsChallenge({ challenge, onAnswer, answered }: MatchPair
 		if (answered || isRightMatched(id)) return;
 
 		// Play audio for English word
-		playWordAudio(item.text, audioRef);
+		playTts(`/api/audio/tts?text=${encodeURIComponent(item.text)}`);
 
 		// Toggle off if already selected
 		if (selectedRight === id) {

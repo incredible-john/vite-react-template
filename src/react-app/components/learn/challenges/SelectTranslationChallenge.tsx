@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { Challenge } from "@/lib/types";
 import { AudioButton } from "../AudioButton";
 import { InteractiveWord } from "../InteractiveWord";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
+import { playTts, stopTts } from "@/lib/sounds";
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -37,7 +38,6 @@ export function SelectTranslationChallenge({
 	answered,
 }: SelectTranslationChallengeProps) {
 	const [selectedId, setSelectedId] = useState<number | null>(null);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	// Shuffle options randomly
 	const shuffledOptions = useMemo(
@@ -49,18 +49,8 @@ export function SelectTranslationChallenge({
 
 	// Auto-play question audio on mount
 	useEffect(() => {
-		const playAudio = () => {
-			if (audioRef.current) {
-				audioRef.current.pause();
-			}
-			const url = `/api/audio/tts?text=${encodeURIComponent(challenge.question)}`;
-			audioRef.current = new Audio(url);
-			audioRef.current.play().catch(() => {});
-		};
-		playAudio();
-		return () => {
-			audioRef.current?.pause();
-		};
+		playTts(`/api/audio/tts?text=${encodeURIComponent(challenge.question)}`);
+		return () => stopTts();
 	}, [challenge.question]);
 
 	// Render text with interactive words

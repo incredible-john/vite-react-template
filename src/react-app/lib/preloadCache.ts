@@ -83,7 +83,8 @@ export function stopPreload(): void {
 }
 
 /** Preload all audio + translations for challenges, sequentially by challenge order.
- *  Within each challenge: full question audio first, then word audios, then translations. */
+ *  Within each challenge: full question audio first, then word audios, then translations,
+ *  then option/token audios (for MATCH_PAIRS, VERB_CONJUGATION, etc.). */
 export function preloadChallenges(challenges: Challenge[]): void {
 	// Abort any previous preload session
 	stopPreload();
@@ -101,17 +102,29 @@ export function preloadChallenges(challenges: Challenge[]): void {
 			await preloadAudio(c.question, signal);
 			if (signal.aborted) return;
 
-			// 2. Individual word audios
+			// 2. Individual word audios + translations from the question
 			const words = extractWords(c.question);
 			for (const word of words) {
 				if (signal.aborted) return;
 				await preloadAudio(word, signal);
 			}
-
-			// 3. Translations
 			for (const word of words) {
 				if (signal.aborted) return;
 				await preloadTranslation(word, signal);
+			}
+
+			// 3. Option audios (important for MATCH_PAIRS, VERB_CONJUGATION, SELECT_TRANSLATION)
+			for (const opt of c.options) {
+				if (signal.aborted) return;
+				await preloadAudio(opt.text, signal);
+			}
+
+			// 4. Token audios + translations (for TRANSLATE challenges using tokens)
+			for (const token of c.tokens) {
+				if (signal.aborted) return;
+				await preloadAudio(token.text, signal);
+				if (signal.aborted) return;
+				await preloadTranslation(token.text, signal);
 			}
 		}
 	})();

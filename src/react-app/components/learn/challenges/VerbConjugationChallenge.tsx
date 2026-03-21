@@ -1,9 +1,9 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import type { Challenge, ChallengeOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
 import { InteractiveWord } from "../InteractiveWord";
-import { playIncorrectSound } from "@/lib/sounds";
+import { playIncorrectSound, playTts } from "@/lib/sounds";
 
 interface VerbConjugationChallengeProps {
 	challenge: Challenge;
@@ -18,21 +18,11 @@ interface Pair {
 
 const isChinese = (text: string): boolean => /[\u4e00-\u9fa5]/.test(text);
 
-const playWordAudio = (text: string, audioRef: React.RefObject<HTMLAudioElement | null>) => {
-	if (audioRef.current) {
-		audioRef.current.pause();
-	}
-	const audio = new Audio(`/api/audio/tts?text=${encodeURIComponent(text)}`);
-	audioRef.current = audio;
-	audio.play().catch(() => {});
-};
-
 export function VerbConjugationChallenge({ challenge, onAnswer, answered }: VerbConjugationChallengeProps) {
 	const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
 	const [selectedRight, setSelectedRight] = useState<number | null>(null);
 	const [matchedPairs, setMatchedPairs] = useState<Pair[]>([]);
 	const [errorPair, setErrorPair] = useState<{ leftId: number; rightId: number } | null>(null);
-	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	// Separate Chinese (left: conjugation names) and English (right: verb forms)
 	const { chineseItems, englishItems } = useMemo(() => {
@@ -76,7 +66,7 @@ export function VerbConjugationChallenge({ challenge, onAnswer, answered }: Verb
 
 	const handleRightClick = (id: number, item: ChallengeOption) => {
 		if (answered || isRightMatched(id)) return;
-		playWordAudio(item.text, audioRef);
+		playTts(`/api/audio/tts?text=${encodeURIComponent(item.text)}`);
 		if (selectedRight === id) {
 			setSelectedRight(null);
 			return;
