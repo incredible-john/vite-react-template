@@ -5,6 +5,7 @@ import { InteractiveWord } from "../InteractiveWord";
 import { WordTile } from "../WordTile";
 import { CheckButton } from "./CheckButton";
 import { playTts, stopTts } from "@/lib/sounds";
+import { extractWords, segmentText, type ParsedWordPiece } from "@/lib/textSegmentation";
 
 interface TranslationAssemblyChallengeProps {
 	challenge: Challenge;
@@ -12,69 +13,14 @@ interface TranslationAssemblyChallengeProps {
 	answered: boolean;
 }
 
-type ParsedWordPiece = { type: "word" | "space"; value: string };
-
-/** Whitespace-based fallback when Intl.Segmenter is unavailable */
-function parseWordsWhitespaceFallback(text: string): ParsedWordPiece[] {
-	const result: ParsedWordPiece[] = [];
-	const wordRegex = /(\s+)/g;
-	let lastIndex = 0;
-	let match: RegExpExecArray | null;
-
-	while ((match = wordRegex.exec(text)) !== null) {
-		if (match.index > lastIndex) {
-			const word = text.slice(lastIndex, match.index).trim();
-			if (word) {
-				result.push({ type: "word", value: word });
-			}
-		}
-		if (match[1]) {
-			result.push({ type: "space", value: match[1] });
-		}
-		lastIndex = wordRegex.lastIndex;
-	}
-
-	if (lastIndex < text.length) {
-		const word = text.slice(lastIndex).trim();
-		if (word) {
-			result.push({ type: "word", value: word });
-		}
-	}
-
-	return result;
-}
-
-/**
- * Word-like segments become InteractiveWord; non-word-like (spaces, punctuation) are plain spans.
- * Uses en locale to match TRANSLATE prompts.
- */
-function parseWords(text: string): ParsedWordPiece[] {
-	if (typeof Intl.Segmenter !== "function") {
-		return parseWordsWhitespaceFallback(text);
-	}
-
-	const result: ParsedWordPiece[] = [];
-	const segmenter = new Intl.Segmenter("en", { granularity: "word" });
-
-	for (const { segment, isWordLike } of segmenter.segment(text)) {
-		if (segment.length === 0) continue;
-		result.push({
-			type: isWordLike ? "word" : "space",
-			value: segment,
-		});
-	}
-
-	return result;
-}
-
-function findPrevWordPiece(pieces: ParsedWordPiece[], fromIndex: number): ParsedWordPiece | undefined {
+function findPrevWordPiece(pieces: ParsedWordPiece[], fromIndex: number) {
 	for (let i = fromIndex - 1; i >= 0; i--) {
 		if (pieces[i].type === "word") return pieces[i];
 	}
 	return undefined;
 }
 
-function findNextWordPiece(pieces: ParsedWordPiece[], fromIndex: number): ParsedWordPiece | undefined {
+function findNextWordPiece(pieces: ParsedWordPiece[], fromIndex: number) {
 	for (let i = fromIndex + 1; i < pieces.length; i++) {
 		if (pieces[i].type === "word") return pieces[i];
 	}
@@ -103,49 +49,52 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 		return () => stopTts();
 	}, [challenge.question]);
 
-	const questionPieces = useMemo(() => parseWords(challenge.question), [challenge.question]);
+	const questionPieces = useMemo(() => segmentText(challenge.question), [challenge.question]);
+	const tokenWordSets = useMemo(
+		() =>
+			challenge.tokens.map((token) => ({
+				token,
+				words: extractWords(token.text),
+			})),
+		[challenge.tokens]
+	);
 
 	const renderParsedQuestion = questionPieces.map((item, idx) => {
 		if (item.type === "space") {
 			return <span key={idx}>{item.value}</span>;
 		}
-		const token = challenge.tokens.filter((t) => {
-			// Use Intl.Segmenter to segment token text & question text
-			const segmenter = typeof Intl.Segmenter === "function"
-				? new Intl.Segmenter("en", { granularity: "word" })
-				: null;
+		const token = tokenWordSets
+			.filter(({ words: tokenWords }) => {
+				const prevWordPiece = findPrevWordPiece(questionPieces, idx);
+				const nextWordPiece = findNextWordPiece(questionPieces, idx);
 
-			let tokenWords: string[] = [];
-			if (segmenter) {
-				tokenWords = Array.from(segmenter.segment(t.text))
-					.filter(s => s.isWordLike)
-					.map(s => s.segment);
-			} else {
-				tokenWords = t.text.trim().split(/\s+/).filter(Boolean);
-			}
+				const itemInToken = tokenWords.includes(item.value);
 
-			const prevWordPiece = findPrevWordPiece(questionPieces, idx);
-			const nextWordPiece = findNextWordPiece(questionPieces, idx);
+				// If token contains only one word, just match current word
+				if (tokenWords.length === 1) {
+					return itemInToken;
+				}
 
-			const itemInToken = tokenWords.includes(item.value);
+				// If token has multiple words, check context: adjacent *word* segments only (skip spaces/punctuation)
+				let neighborWordInToken = false;
+				if (prevWordPiece && tokenWords.includes(prevWordPiece.value)) {
+					neighborWordInToken = true;
+				}
+				if (nextWordPiece && tokenWords.includes(nextWordPiece.value)) {
+					neighborWordInToken = true;
+				}
 
-			// If token contains only one word, just match current word
-			if (tokenWords.length === 1) {
-				return itemInToken;
-			}
-
-			// If token has multiple words, check context: adjacent *word* segments only (skip spaces/punctuation)
-			let neighborWordInToken = false;
-			if (prevWordPiece && tokenWords.includes(prevWordPiece.value)) {
-				neighborWordInToken = true;
-			}
-			if (nextWordPiece && tokenWords.includes(nextWordPiece.value)) {
-				neighborWordInToken = true;
-			}
-
-			return itemInToken && neighborWordInToken;
-		});
-		return <InteractiveWord key={idx} word={item.value} className="text-base font-medium" prefetchedTranslation={token} />;
+				return itemInToken && neighborWordInToken;
+			})
+			.map(({ token }) => token);
+		return (
+			<InteractiveWord
+				key={idx}
+				word={item.value}
+				className="text-base font-medium"
+				prefetchedTranslation={token}
+			/>
+		);
 	});
 
 	const handleSelectFromBank = useCallback(

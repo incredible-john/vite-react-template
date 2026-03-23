@@ -1,4 +1,5 @@
 import type { Challenge } from "./types";
+import { extractWords } from "./textSegmentation";
 
 // --- Audio cache: URL string → Blob URL ---
 const audioBlobCache = new Map<string, string>();
@@ -67,11 +68,6 @@ export async function fetchTranslation(word: string): Promise<string | null> {
 	return preloadTranslation(word);
 }
 
-/** Extract individual words from text */
-function extractWords(text: string): string[] {
-	return text.split(/\s+/).filter(Boolean);
-}
-
 let preloadAbort: AbortController | null = null;
 
 /** Stop all in-flight preload requests */
@@ -102,7 +98,7 @@ export function preloadChallenges(challenges: Challenge[]): void {
 			await preloadAudio(c.question, signal);
 			if (signal.aborted) return;
 
-			// 2. Per-word audio + translations (whitespace-split; TRANSLATE UI uses Intl.Segmenter, approximate)
+			// 2. Per-word audio + translations (shared with challenge word segmentation)
 			const words = extractWords(c.question);
 			for (const word of words) {
 				if (signal.aborted) return;

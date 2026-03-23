@@ -5,21 +5,12 @@ import { InteractiveWord } from "../InteractiveWord";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
 import { playTts, stopTts } from "@/lib/sounds";
+import { segmentText } from "@/lib/textSegmentation";
 
 interface FillBlankChallengeProps {
 	challenge: Challenge;
 	onAnswer: (answer: string) => void;
 	answered: boolean;
-}
-
-// Helper function to split text into words while preserving spaces and punctuation
-function parseWords(text: string): Array<{ type: "word" | "space"; value: string }> {
-	const parts = text.split(/(\s+)/);
-	return parts
-		.filter((p) => p.length > 0)
-		.map((part) =>
-			/^\s+$/.test(part) ? { type: "space" as const, value: part } : { type: "word" as const, value: part }
-		);
 }
 
 export function FillBlankChallenge({ challenge, onAnswer, answered }: FillBlankChallengeProps) {
@@ -36,7 +27,7 @@ export function FillBlankChallenge({ challenge, onAnswer, answered }: FillBlankC
 
 	// Render text with interactive words
 	const renderInteractiveText = (text: string) => {
-		const parsed = parseWords(text);
+		const parsed = segmentText(text);
 		return parsed.map((item, idx) => {
 			if (item.type === "space") {
 				return <span key={idx}>{item.value}</span>;

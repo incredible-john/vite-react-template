@@ -5,6 +5,7 @@ import { InteractiveWord } from "../InteractiveWord";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
 import { playTts, stopTts } from "@/lib/sounds";
+import { segmentText } from "@/lib/textSegmentation";
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -20,16 +21,6 @@ interface SelectTranslationChallengeProps {
 	challenge: Challenge;
 	onAnswer: (answer: string) => void;
 	answered: boolean;
-}
-
-// Helper function to split text into words (uses split to avoid sticky-regex bugs)
-function parseWords(text: string): Array<{ type: "word" | "space"; value: string }> {
-	const parts = text.split(/(\s+)/);
-	return parts
-		.filter((p) => p.length > 0)
-		.map((part) =>
-			/^\s+$/.test(part) ? { type: "space" as const, value: part } : { type: "word" as const, value: part }
-		);
 }
 
 export function SelectTranslationChallenge({
@@ -55,7 +46,7 @@ export function SelectTranslationChallenge({
 
 	// Render text with interactive words
 	const renderInteractiveText = (text: string) => {
-		const parsed = parseWords(text);
+		const parsed = segmentText(text);
 		return parsed.map((item, idx) => {
 			if (item.type === "space") {
 				return <span key={idx}>{item.value}</span>;
