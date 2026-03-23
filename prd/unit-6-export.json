@@ -1,0 +1,70 @@
+{
+  "subjectId": 2,
+  "title": "The Lion and the Mouse",
+  "description": "A fable about kindness and helping others",
+  "order": 0,
+  "lessons": [
+    {
+      "title": "Animals & Nature",
+      "challenges": [
+        {
+          "type": "TRANSLATE",
+          "question": "A lion was sleeping under a tree.",
+          "sentence": null,
+          "translation": null,
+          "options": [
+            {
+              "text": "一只",
+              "isCorrect": true
+            },
+            {
+              "text": "狮子",
+              "isCorrect": true
+            },
+            {
+              "text": "在",
+              "isCorrect": true
+            },
+            {
+              "text": "树下",
+              "isCorrect": true
+            },
+            {
+              "text": "睡觉",
+              "isCorrect": true
+            },
+            {
+              "text": "老鼠",
+              "isCorrect": false
+            },
+            {
+              "text": "陷阱",
+              "isCorrect": false
+            }
+          ],
+          "tokens": [
+            {
+              "type": "token",
+              "text": "A lion",
+              "translation": "一只狮子"
+            },
+            {
+              "type": "token",
+              "text": "was sleeping",
+              "translation": "在睡觉"
+            },
+            {
+              "type": "token",
+              "text": "under a tree",
+              "translation": "在一棵树下面"
+            },
+            {
+              "type": "punctuation",
+              "text": "."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

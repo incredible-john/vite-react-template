@@ -2,41 +2,51 @@ import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { playTts } from "@/lib/sounds";
 import { getCachedTranslation, fetchTranslation } from "@/lib/preloadCache";
+import { ChallengeToken } from "@/lib/types";
 
 interface InteractiveWordProps {
 	word: string;
 	className?: string;
+	/** From challenge_tokens.translation when available */
+	prefetchedTranslation?: ChallengeToken[];
 }
 
-export function InteractiveWord({ word, className }: InteractiveWordProps) {
-	const [translation, setTranslation] = useState<string | null>(() => getCachedTranslation(word));
+export function InteractiveWord({ word, className, prefetchedTranslation }: InteractiveWordProps) {
+	const [translation, setTranslation] = useState<string | null>(null);
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [playing, setPlaying] = useState(false);
 	const tooltipRef = useRef<HTMLDivElement>(null);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
-	const handleClick = async (e: React.MouseEvent) => {
+	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
+		setShowTooltip(true);
+
+		// Translation: never blocked by TTS; use cache synchronously when available
+		if (!translation) {
+			const cached = getCachedTranslation(word);
+			if (cached) {
+				setTranslation(cached);
+			} else {
+				setLoading(true);
+				void fetchTranslation(word)
+					.then((result) => {
+						if (result) setTranslation(result);
+					})
+					.catch((error) => {
+						console.error("Translation error:", error);
+					})
+					.finally(() => {
+						setLoading(false);
+					});
+			}
+		}
+
 		const audio = playTts(`/api/audio/tts?text=${encodeURIComponent(word)}`);
 		setPlaying(true);
 		audio.addEventListener("ended", () => setPlaying(false));
 		audio.addEventListener("error", () => setPlaying(false));
-
-		// Fetch translation if not cached
-		if (!translation) {
-			setLoading(true);
-			try {
-				const result = await fetchTranslation(word);
-				if (result) setTranslation(result);
-			} catch (error) {
-				console.error("Translation error:", error);
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		setShowTooltip(true);
 	};
 
 	// Close tooltip when clicking outside
@@ -84,7 +94,18 @@ export function InteractiveWord({ word, className }: InteractiveWordProps) {
 					{loading ? (
 						<span className="text-gray-400">Loading...</span>
 					) : translation ? (
-						translation
+						<>
+							{prefetchedTranslation && prefetchedTranslation.length > 0 ? (
+								<p>{word} {translation}</p>
+							) : (
+								<p>{translation}</p>
+							)}
+							{prefetchedTranslation?.map((t, i) => (
+								<p key={i}>
+									{t.text} {t.translation}
+								</p>
+							))}
+						</>
 					) : null}
 					<div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
 				</div>

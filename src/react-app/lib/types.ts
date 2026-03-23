@@ -37,6 +37,8 @@ export type ChallengeType =
 	| "SELECT_TRANSLATION"
 	| "VERB_CONJUGATION";
 
+export type ChallengeTokenType = "token" | "punctuation";
+
 export interface ChallengeOption {
 	id: number;
 	challengeId: number;
@@ -49,6 +51,7 @@ export interface ChallengeOption {
 export interface ChallengeToken {
 	id: number;
 	challengeId: number;
+	type: ChallengeTokenType;
 	text: string;
 	translation: string | null;
 	audioUrl: string | null;

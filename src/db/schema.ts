@@ -65,6 +65,9 @@ export type ChallengeType =
 	| "SELECT_TRANSLATION"
 	| "VERB_CONJUGATION";
 
+/** Display / import: word chunk vs punctuation in tokenized English. */
+export type ChallengeTokenType = "token" | "punctuation";
+
 export const challenges = sqliteTable("challenges", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	lessonId: integer("lesson_id")
@@ -118,13 +121,28 @@ export const challengeOptions = sqliteTable("challenge_options", {
 	order: integer("order").notNull().default(0),
 });
 
+export const challengeOptionsRelations = relations(challengeOptions, ({ one }) => ({
+	challenge: one(challenges, {
+		fields: [challengeOptions.challengeId],
+		references: [challenges.id],
+	}),
+}));
+
 export const challengeTokens = sqliteTable("challenge_tokens", {
 	id: integer("id").primaryKey({ autoIncrement: true }),
 	challengeId: integer("challenge_id")
 		.notNull()
 		.references(() => challenges.id, { onDelete: "cascade" }),
+	type: text("type").notNull().default("token").$type<ChallengeTokenType>(),
 	text: text("text").notNull(),
 	translation: text("translation"),
 	audioUrl: text("audio_url"),
 	order: integer("order").notNull().default(0),
 });
+
+export const challengeTokensRelations = relations(challengeTokens, ({ one }) => ({
+	challenge: one(challenges, {
+		fields: [challengeTokens.challengeId],
+		references: [challenges.id],
+	}),
+}));

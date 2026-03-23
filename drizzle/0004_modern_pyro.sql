@@ -1,0 +1,1 @@
+ALTER TABLE `challenge_tokens` ADD `type` text DEFAULT 'token' NOT NULL;

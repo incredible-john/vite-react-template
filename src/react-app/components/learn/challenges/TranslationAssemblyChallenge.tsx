@@ -12,12 +12,14 @@ interface TranslationAssemblyChallengeProps {
 	answered: boolean;
 }
 
-// Helper function to split text into words
-function parseWords(text: string): Array<{ type: "word" | "space"; value: string }> {
-	const result: Array<{ type: "word" | "space"; value: string }> = [];
+type ParsedWordPiece = { type: "word" | "space"; value: string };
+
+/** Whitespace-based fallback when Intl.Segmenter is unavailable */
+function parseWordsWhitespaceFallback(text: string): ParsedWordPiece[] {
+	const result: ParsedWordPiece[] = [];
 	const wordRegex = /(\s+)/g;
 	let lastIndex = 0;
-	let match;
+	let match: RegExpExecArray | null;
 
 	while ((match = wordRegex.exec(text)) !== null) {
 		if (match.index > lastIndex) {
@@ -42,6 +44,43 @@ function parseWords(text: string): Array<{ type: "word" | "space"; value: string
 	return result;
 }
 
+/**
+ * Word-like segments become InteractiveWord; non-word-like (spaces, punctuation) are plain spans.
+ * Uses en locale to match TRANSLATE prompts.
+ */
+function parseWords(text: string): ParsedWordPiece[] {
+	if (typeof Intl.Segmenter !== "function") {
+		return parseWordsWhitespaceFallback(text);
+	}
+
+	const result: ParsedWordPiece[] = [];
+	const segmenter = new Intl.Segmenter("en", { granularity: "word" });
+
+	for (const { segment, isWordLike } of segmenter.segment(text)) {
+		if (segment.length === 0) continue;
+		result.push({
+			type: isWordLike ? "word" : "space",
+			value: segment,
+		});
+	}
+
+	return result;
+}
+
+function findPrevWordPiece(pieces: ParsedWordPiece[], fromIndex: number): ParsedWordPiece | undefined {
+	for (let i = fromIndex - 1; i >= 0; i--) {
+		if (pieces[i].type === "word") return pieces[i];
+	}
+	return undefined;
+}
+
+function findNextWordPiece(pieces: ParsedWordPiece[], fromIndex: number): ParsedWordPiece | undefined {
+	for (let i = fromIndex + 1; i < pieces.length; i++) {
+		if (pieces[i].type === "word") return pieces[i];
+	}
+	return undefined;
+}
+
 export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: TranslationAssemblyChallengeProps) {
 	const [selected, setSelected] = useState<number[]>([]);
 
@@ -64,16 +103,50 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 		return () => stopTts();
 	}, [challenge.question]);
 
-	// Render text with interactive words
-	const renderInteractiveText = (text: string) => {
-		const parsed = parseWords(text);
-		return parsed.map((item, idx) => {
-			if (item.type === "space") {
-				return <span key={idx}>{item.value}</span>;
+	const questionPieces = useMemo(() => parseWords(challenge.question), [challenge.question]);
+
+	const renderParsedQuestion = questionPieces.map((item, idx) => {
+		if (item.type === "space") {
+			return <span key={idx}>{item.value}</span>;
+		}
+		const token = challenge.tokens.filter((t) => {
+			// Use Intl.Segmenter to segment token text & question text
+			const segmenter = typeof Intl.Segmenter === "function"
+				? new Intl.Segmenter("en", { granularity: "word" })
+				: null;
+
+			let tokenWords: string[] = [];
+			if (segmenter) {
+				tokenWords = Array.from(segmenter.segment(t.text))
+					.filter(s => s.isWordLike)
+					.map(s => s.segment);
+			} else {
+				tokenWords = t.text.trim().split(/\s+/).filter(Boolean);
 			}
-			return <InteractiveWord key={idx} word={item.value} className="text-base font-medium" />;
+
+			const prevWordPiece = findPrevWordPiece(questionPieces, idx);
+			const nextWordPiece = findNextWordPiece(questionPieces, idx);
+
+			const itemInToken = tokenWords.includes(item.value);
+
+			// If token contains only one word, just match current word
+			if (tokenWords.length === 1) {
+				return itemInToken;
+			}
+
+			// If token has multiple words, check context: adjacent *word* segments only (skip spaces/punctuation)
+			let neighborWordInToken = false;
+			if (prevWordPiece && tokenWords.includes(prevWordPiece.value)) {
+				neighborWordInToken = true;
+			}
+			if (nextWordPiece && tokenWords.includes(nextWordPiece.value)) {
+				neighborWordInToken = true;
+			}
+
+			return itemInToken && neighborWordInToken;
 		});
-	};
+		return <InteractiveWord key={idx} word={item.value} className="text-base font-medium" prefetchedTranslation={token} />;
+	});
 
 	const handleSelectFromBank = useCallback(
 		(idx: number) => {
@@ -109,7 +182,7 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 					</div>
 					<div className="flex items-center gap-2 bg-white border-2 border-border rounded-2xl px-4 py-3 shadow-sm relative">
 						<AudioButton text={challenge.question} size="sm" />
-						<span className="text-base font-medium">{renderInteractiveText(challenge.question)}</span>
+						<span className="text-base font-medium">{renderParsedQuestion}</span>
 					</div>
 				</div>
 			</div>
