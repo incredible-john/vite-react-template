@@ -100,8 +100,3 @@ export function SelectTranslationChallenge({
 		</div>
 	);
 }
-
-export function getSelectTranslationCorrectAnswer(challenge: Challenge): string {
-	const correct = challenge.options.find((o) => o.isCorrect);
-	return correct?.text ?? "";
-}

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import type { Database } from "../../db";
 import * as schema from "../../db/schema";
-import type { ChallengeTokenType, ChallengeType } from "../../db/schema";
+import type { ChallengeTokenType, ChallengeType, LanguageCode } from "../../db/schema";
 
 type ImportHttpStatus = 400 | 404 | 500;
 
@@ -28,6 +28,8 @@ export type UnitImportBody = {
 			question: string;
 			sentence?: string | null;
 			translation?: string | null;
+			sourceLang?: LanguageCode;
+			targetLang?: LanguageCode;
 			options?: Array<{ text: string; isCorrect: boolean }>;
 			tokens?: Array<{ type?: string; text: string; translation?: string | null }>;
 		}>;
@@ -88,6 +90,8 @@ export async function importUnitFromPayload(db: Database, data: UnitImportBody) 
 					question: ch.question,
 					sentence: ch.sentence ?? null,
 					translation: ch.translation ?? null,
+					sourceLang: ch.sourceLang ?? "en",
+					targetLang: ch.targetLang ?? "zh",
 					audioUrl: null,
 					order: ci,
 				})

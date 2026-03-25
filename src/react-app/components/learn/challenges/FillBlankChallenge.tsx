@@ -98,8 +98,3 @@ export function FillBlankChallenge({ challenge, onAnswer, answered }: FillBlankC
 		</div>
 	);
 }
-
-export function getFillBlankCorrectAnswer(challenge: Challenge): string {
-	const correct = challenge.options.find((o) => o.isCorrect);
-	return correct?.text ?? "";
-}

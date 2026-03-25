@@ -5,6 +5,12 @@ import { InteractiveWord } from "../InteractiveWord";
 import { WordTile } from "../WordTile";
 import { CheckButton } from "./CheckButton";
 import { playTts, stopTts } from "@/lib/sounds";
+import { buildTtsUrl } from "@/lib/preloadCache";
+import {
+	getChallengeSourceLang,
+	getChallengeTargetLang,
+} from "@/lib/challengeLanguages";
+import { getTranslationAssemblyWordBank } from "@/lib/translationAssembly";
 import { extractWords, segmentText, type ParsedWordPiece } from "@/lib/textSegmentation";
 
 interface TranslationAssemblyChallengeProps {
@@ -27,36 +33,45 @@ function findNextWordPiece(pieces: ParsedWordPiece[], fromIndex: number) {
 	return undefined;
 }
 
+function shuffleArray<T>(array: T[]): T[] {
+	return [...array].sort(() => Math.random() - 0.5);
+}
+
 export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: TranslationAssemblyChallengeProps) {
 	const [selected, setSelected] = useState<number[]>([]);
 
-	const options = challenge.options;
+	const sourceLang = getChallengeSourceLang(challenge);
+	const targetLang = getChallengeTargetLang(challenge);
+	const options = useMemo(() => getTranslationAssemblyWordBank(challenge), [challenge]);
+	const selectedOptions = useMemo(
+		() => selected.map((order) => options.find((candidate) => candidate.order === order)!),
+		[selected, options]
+	);
 
 	// Shuffle options for display
-	const shuffledOptions = useMemo(() => {
-		const arr = [...challenge.options];
-		for (let i = arr.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[arr[i], arr[j]] = [arr[j], arr[i]];
-		}
-		return arr;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [challenge.id]);
+	const shuffledOptions = useMemo(() => shuffleArray(options), [options]);
 
 	// Auto-play question audio on mount
 	useEffect(() => {
-		playTts(`/api/audio/tts?text=${encodeURIComponent(challenge.question)}`);
-		return () => stopTts();
-	}, [challenge.question]);
+		if (sourceLang === "zh") {
+			return () => stopTts();
+		}
 
-	const questionPieces = useMemo(() => segmentText(challenge.question), [challenge.question]);
+		playTts(buildTtsUrl(challenge.question));
+		return () => stopTts();
+	}, [challenge.question, sourceLang]);
+
+	const questionPieces = useMemo(
+		() => segmentText(challenge.question, sourceLang),
+		[challenge.question, sourceLang]
+	);
 	const tokenWordSets = useMemo(
 		() =>
 			challenge.tokens.map((token) => ({
 				token,
-				words: extractWords(token.text),
+				words: extractWords(token.text, sourceLang),
 			})),
-		[challenge.tokens]
+		[challenge.tokens, sourceLang]
 	);
 
 	const renderParsedQuestion = questionPieces.map((item, idx) => {
@@ -93,16 +108,22 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 				word={item.value}
 				className="text-base font-medium"
 				prefetchedTranslation={token}
+				sourceLang={sourceLang}
+				targetLang={targetLang}
+				playAudioOnClick={sourceLang !== "zh"}
 			/>
 		);
 	});
 
 	const handleSelectFromBank = useCallback(
-		(idx: number) => {
+		(order: number, text: string) => {
 			if (answered) return;
-			setSelected((prev) => [...prev, idx]);
+			if (targetLang === "en") {
+				playTts(buildTtsUrl(text));
+			}
+			setSelected((prev) => [...prev, order]);
 		},
-		[answered]
+		[answered, targetLang]
 	);
 
 	const handleRemoveFromAnswer = useCallback(
@@ -113,10 +134,8 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 		[answered]
 	);
 
-	const currentAnswer = selected.map((i) => options[i].text).join("");
-
 	const handleCheck = () => {
-		onAnswer(currentAnswer);
+		onAnswer(selectedOptions.map((option) => option.text).join(""));
 	};
 
 	return (
@@ -139,15 +158,17 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 			{/* Answer area */}
 			<div className="px-6 mb-4">
 				<div className="min-h-[52px] flex flex-wrap gap-2 border-b-2 border-border pb-3 mb-1">
-					{selected.map((optIdx, posInAnswer) => (
-						<WordTile
-							key={`answer-${posInAnswer}`}
-							text={options[optIdx].text}
-							variant="answer"
-							onClick={() => handleRemoveFromAnswer(posInAnswer)}
-							disabled={answered}
-						/>
-					))}
+					{selectedOptions.map((option, posInAnswer) => {
+						return (
+							<WordTile
+								key={`answer-${posInAnswer}`}
+								text={option.text}
+								variant="answer"
+								onClick={() => handleRemoveFromAnswer(posInAnswer)}
+								disabled={answered}
+							/>
+						);
+					})}
 				</div>
 			</div>
 
@@ -159,7 +180,7 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 							key={opt.id}
 							text={opt.text}
 							selected={selected.includes(opt.order)}
-							onClick={() => handleSelectFromBank(opt.order)}
+							onClick={() => handleSelectFromBank(opt.order, opt.text)}
 							disabled={answered}
 						/>
 					))}
@@ -174,10 +195,3 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 	);
 }
 
-export function getTranslationAssemblyCorrectAnswer(challenge: Challenge): string {
-	return challenge.options
-		.filter((o) => o.isCorrect)
-		.sort((a, b) => a.order - b.order)
-		.map((o) => o.text)
-		.join("");
-}

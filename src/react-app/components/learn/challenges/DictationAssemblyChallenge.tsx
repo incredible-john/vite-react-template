@@ -67,7 +67,7 @@ export function DictationAssemblyChallenge({
 	);
 
 	const currentAnswer = useMemo(
-		() => selected.map((order) => tokenByOrder.get(order)).filter(Boolean).join(" "),
+		() => selected.map((order) => tokenByOrder.get(order)!).join(""),
 		[selected, tokenByOrder]
 	);
 
@@ -144,8 +144,4 @@ export function DictationAssemblyChallenge({
 			)}
 		</div>
 	);
-}
-
-export function getDictationAssemblyCorrectAnswer(challenge: Challenge): string {
-	return getQuestionTokens(challenge.question).join(" ");
 }

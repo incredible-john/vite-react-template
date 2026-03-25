@@ -1,4 +1,4 @@
-import type { Subject, UnitWithLessons, LessonWithChallenges, Challenge, ChallengeOption } from "./types";
+import type { Subject, UnitWithLessons, LessonWithChallenges, Challenge, ChallengeOption, LanguageCode } from "./types";
 
 const BASE = "/api";
 
@@ -120,11 +120,23 @@ export function deleteLesson(id: number) {
 }
 
 // Challenge CRUD
-export function createChallenge(data: { lessonId: number; type: string; question: string }) {
+export function createChallenge(data: {
+	lessonId: number;
+	type: string;
+	question: string;
+	sourceLang?: LanguageCode;
+	targetLang?: LanguageCode;
+}) {
 	return fetchApi<Challenge>(`${BASE}/admin/challenges`, { method: "POST", body: data });
 }
 
-export function updateChallenge(id: number, data: { question?: string; type?: string; order?: number }) {
+export function updateChallenge(id: number, data: {
+	question?: string;
+	type?: string;
+	order?: number;
+	sourceLang?: LanguageCode;
+	targetLang?: LanguageCode;
+}) {
 	return fetchApi<Challenge>(`${BASE}/admin/challenges/${id}`, { method: "PUT", body: data });
 }
 

@@ -2,16 +2,26 @@ import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { playTts } from "@/lib/sounds";
 import { getCachedTranslation, fetchTranslation } from "@/lib/preloadCache";
-import { ChallengeToken } from "@/lib/types";
+import type { ChallengeToken, LanguageCode } from "@/lib/types";
 
 interface InteractiveWordProps {
 	word: string;
 	className?: string;
 	/** From challenge_tokens.translation when available */
 	prefetchedTranslation?: ChallengeToken[];
+	sourceLang?: LanguageCode;
+	targetLang?: LanguageCode;
+	playAudioOnClick?: boolean;
 }
 
-export function InteractiveWord({ word, className, prefetchedTranslation }: InteractiveWordProps) {
+export function InteractiveWord({
+	word,
+	className,
+	prefetchedTranslation,
+	sourceLang = "en",
+	targetLang = "zh",
+	playAudioOnClick = true,
+}: InteractiveWordProps) {
 	const [translation, setTranslation] = useState<string | null>(null);
 	const [showTooltip, setShowTooltip] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -25,12 +35,12 @@ export function InteractiveWord({ word, className, prefetchedTranslation }: Inte
 
 		// Translation: never blocked by TTS; use cache synchronously when available
 		if (!translation) {
-			const cached = getCachedTranslation(word);
+			const cached = getCachedTranslation(word, sourceLang, targetLang);
 			if (cached) {
 				setTranslation(cached);
 			} else {
 				setLoading(true);
-				void fetchTranslation(word)
+				void fetchTranslation(word, sourceLang, targetLang)
 					.then((result) => {
 						if (result) setTranslation(result);
 					})
@@ -43,10 +53,12 @@ export function InteractiveWord({ word, className, prefetchedTranslation }: Inte
 			}
 		}
 
-		const audio = playTts(`/api/audio/tts?text=${encodeURIComponent(word)}`);
-		setPlaying(true);
-		audio.addEventListener("ended", () => setPlaying(false));
-		audio.addEventListener("error", () => setPlaying(false));
+		if (playAudioOnClick) {
+			const audio = playTts(`/api/audio/tts?text=${encodeURIComponent(word)}`);
+			setPlaying(true);
+			audio.addEventListener("ended", () => setPlaying(false));
+			audio.addEventListener("error", () => setPlaying(false));
+		}
 	};
 
 	// Close tooltip when clicking outside

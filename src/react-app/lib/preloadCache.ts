@@ -1,5 +1,7 @@
-import type { Challenge } from "./types";
+import type { Challenge, LanguageCode } from "./types";
+import { getChallengeSourceLang, getChallengeTargetLang } from "./challengeLanguages";
 import { extractWords } from "./textSegmentation";
+import { getTranslationAssemblyWordBank } from "./translationAssembly";
 
 export type TtsVariant = "normal" | "slow";
 
@@ -44,33 +46,52 @@ export function getCachedAudioUrl(text: string, variant: TtsVariant = "normal"):
 const translationCache = new Map<string, string>();
 const translationPendingCache = new Map<string, Promise<string | null>>();
 
-async function preloadTranslation(word: string, signal?: AbortSignal): Promise<string | null> {
-	if (translationCache.has(word)) return translationCache.get(word)!;
-	if (translationPendingCache.has(word)) return translationPendingCache.get(word)!;
+function getTranslationCacheKey(text: string, from: LanguageCode, to: LanguageCode): string {
+	return `${from}:${to}:${text}`;
+}
 
-	const p = fetch(`/api/translate/translate?text=${encodeURIComponent(word)}&from=en&to=zh`, { signal })
+async function preloadTranslation(
+	text: string,
+	from: LanguageCode = "en",
+	to: LanguageCode = "zh",
+	signal?: AbortSignal,
+): Promise<string | null> {
+	const key = getTranslationCacheKey(text, from, to);
+	if (translationCache.has(key)) return translationCache.get(key)!;
+	if (translationPendingCache.has(key)) return translationPendingCache.get(key)!;
+
+	const p = fetch(`/api/translate/translate?text=${encodeURIComponent(text)}&from=${from}&to=${to}`, { signal })
 		.then(async (res) => {
 			if (!res.ok) return null;
 			const data = await res.json();
 			if (data.translations && data.translations.length > 0) {
-				translationCache.set(word, data.translations[0]);
+				translationCache.set(key, data.translations[0]);
 				return data.translations[0] as string;
 			}
 			return null;
 		})
 		.catch(() => null)
-		.finally(() => translationPendingCache.delete(word));
-	translationPendingCache.set(word, p);
+		.finally(() => translationPendingCache.delete(key));
+	translationPendingCache.set(key, p);
 	return p;
 }
 
-export function getCachedTranslation(word: string): string | null {
-	return translationCache.get(word) ?? null;
+export function getCachedTranslation(
+	text: string,
+	from: LanguageCode = "en",
+	to: LanguageCode = "zh",
+): string | null {
+	return translationCache.get(getTranslationCacheKey(text, from, to)) ?? null;
 }
 
-export async function fetchTranslation(word: string): Promise<string | null> {
-	if (translationCache.has(word)) return translationCache.get(word)!;
-	return preloadTranslation(word);
+export async function fetchTranslation(
+	text: string,
+	from: LanguageCode = "en",
+	to: LanguageCode = "zh",
+): Promise<string | null> {
+	const key = getTranslationCacheKey(text, from, to);
+	if (translationCache.has(key)) return translationCache.get(key)!;
+	return preloadTranslation(text, from, to);
 }
 
 let preloadAbort: AbortController | null = null;
@@ -102,17 +123,20 @@ export function preloadChallenges(challenges: Challenge[]): void {
 				if (signal.aborted) return;
 			}
 
-			const words = extractWords(c.question);
+			const sourceLang = getChallengeSourceLang(c);
+			const targetLang = getChallengeTargetLang(c);
+			console.log("source_lang:", sourceLang);
+			const words = extractWords(c.question, sourceLang);
 			for (const word of words) {
 				if (signal.aborted) return;
 				await preloadAudio(word, signal);
 			}
 			for (const word of words) {
 				if (signal.aborted) return;
-				await preloadTranslation(word, signal);
+				await preloadTranslation(word, sourceLang, targetLang, signal);
 			}
 
-			for (const opt of c.options) {
+			for (const opt of getTranslationAssemblyWordBank(c)) {
 				if (signal.aborted) return;
 				await preloadAudio(opt.text, signal);
 			}

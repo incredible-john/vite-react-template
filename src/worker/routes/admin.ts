@@ -30,6 +30,8 @@ function sanitizeUnitExportTree(unit: UnitWithLessons) {
 				question: ch.question,
 				sentence: ch.sentence,
 				translation: ch.translation,
+				sourceLang: ch.sourceLang,
+				targetLang: ch.targetLang,
 				options: ch.options.map((opt) => ({
 					text: opt.text,
 					isCorrect: opt.isCorrect,

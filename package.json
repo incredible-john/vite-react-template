@@ -15,7 +15,6 @@
 		"@clerk/backend": "^3.2.1",
 		"@clerk/localizations": "^4.2.1",
 		"@clerk/react": "^6.1.0",
-		"@elevenlabs/elevenlabs-js": "^2.38.1",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.45.1",

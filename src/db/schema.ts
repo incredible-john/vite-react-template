@@ -63,7 +63,10 @@ export type ChallengeType =
 	| "FILL_BLANK"
 	| "MATCH_PAIRS"
 	| "SELECT_TRANSLATION"
-	| "VERB_CONJUGATION";
+	| "VERB_CONJUGATION"
+	| "DICTATION_ASSEMBLY";
+
+export type LanguageCode = "en" | "zh";
 
 /** Display / import: word chunk vs punctuation in tokenized English. */
 export type ChallengeTokenType = "token" | "punctuation";
@@ -77,6 +80,8 @@ export const challenges = sqliteTable("challenges", {
 	question: text("question").notNull(),
 	sentence: text("sentence"),
 	translation: text("translation"),
+	sourceLang: text("source_lang").notNull().default("en").$type<LanguageCode>(),
+	targetLang: text("target_lang").notNull().default("zh").$type<LanguageCode>(),
 	audioUrl: text("audio_url"),
 	order: integer("order").notNull().default(0),
 	createdAt: text("created_at")

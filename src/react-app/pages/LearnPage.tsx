@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ChallengeHeader } from "@/components/learn/challenges/ChallengeHeader";
-import { DictationAssemblyChallenge, getDictationAssemblyCorrectAnswer } from "@/components/learn/challenges/DictationAssemblyChallenge";
+import { DictationAssemblyChallenge } from "@/components/learn/challenges/DictationAssemblyChallenge";
 import { FeedbackBanner } from "@/components/learn/challenges/FeedbackBanner";
-import { FillBlankChallenge, getFillBlankCorrectAnswer } from "@/components/learn/challenges/FillBlankChallenge";
-import { MatchPairsChallenge, getMatchPairsCorrectAnswer } from "@/components/learn/challenges/MatchPairsChallenge";
-import { SelectTranslationChallenge, getSelectTranslationCorrectAnswer } from "@/components/learn/challenges/SelectTranslationChallenge";
-import { TranslationAssemblyChallenge, getTranslationAssemblyCorrectAnswer } from "@/components/learn/challenges/TranslationAssemblyChallenge";
-import { VerbConjugationChallenge, getVerbConjugationCorrectAnswer } from "@/components/learn/challenges/VerbConjugationChallenge";
+import { FillBlankChallenge } from "@/components/learn/challenges/FillBlankChallenge";
+import { MatchPairsChallenge } from "@/components/learn/challenges/MatchPairsChallenge";
+import { SelectTranslationChallenge } from "@/components/learn/challenges/SelectTranslationChallenge";
+import { TranslationAssemblyChallenge } from "@/components/learn/challenges/TranslationAssemblyChallenge";
+import { VerbConjugationChallenge } from "@/components/learn/challenges/VerbConjugationChallenge";
 import { LessonComplete } from "@/components/learn/LessonComplete";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { getLesson, markChallengeComplete } from "@/lib/api";
+import { getChallengeCorrectAnswer } from "@/lib/challengeCorrectAnswers";
 import { preloadChallenges, stopPreload } from "@/lib/preloadCache";
 import { playCorrectSound, playIncorrectSound } from "@/lib/sounds";
 import type { Challenge, LessonWithChallenges } from "@/lib/types";
@@ -27,25 +28,8 @@ interface LearnPageProps {
 	mockLesson?: LessonWithChallenges;
 }
 
-function getCorrectAnswer(challenge: Challenge): string {
-	switch (challenge.type) {
-		case "TRANSLATE":
-			return getTranslationAssemblyCorrectAnswer(challenge);
-		case "FILL_BLANK":
-			return getFillBlankCorrectAnswer(challenge);
-		case "MATCH_PAIRS":
-			return getMatchPairsCorrectAnswer(challenge);
-		case "SELECT_TRANSLATION":
-			return getSelectTranslationCorrectAnswer(challenge);
-		case "VERB_CONJUGATION":
-			return getVerbConjugationCorrectAnswer(challenge);
-		case "DICTATION_ASSEMBLY":
-			return getDictationAssemblyCorrectAnswer(challenge);
-	}
-}
-
 function checkAnswer(challenge: Challenge, answer: string): boolean {
-	return answer === getCorrectAnswer(challenge);
+	return answer === getChallengeCorrectAnswer(challenge);
 }
 
 let keyCounter = 0;
@@ -209,7 +193,7 @@ export function LearnPage({ mockLesson }: LearnPageProps) {
 			{answered && (
 				<FeedbackBanner
 					isCorrect={isCorrect}
-					correctAnswer={current ? getCorrectAnswer(current) : undefined}
+					correctAnswer={current ? getChallengeCorrectAnswer(current) : undefined}
 					translation={isCorrect ? current?.translation : undefined}
 					onContinue={handleContinue}
 				/>

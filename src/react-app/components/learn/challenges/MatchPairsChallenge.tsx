@@ -180,15 +180,3 @@ export function MatchPairsChallenge({ challenge, onAnswer, answered }: MatchPair
 	);
 }
 
-export function getMatchPairsCorrectAnswer(challenge: Challenge): string {
-	const chinese: ChallengeOption[] = [];
-	const english: ChallengeOption[] = [];
-	challenge.options.forEach((opt) => {
-		if (isChinese(opt.text)) {
-			chinese.push(opt);
-		} else {
-			english.push(opt);
-		}
-	});
-	return chinese.map((c, i) => `${c.id}-${english[i].id}`).join(",");
-}

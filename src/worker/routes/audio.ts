@@ -1,6 +1,8 @@
 import { Hono } from "hono";
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 import type { AppEnv } from "../types";
+
+const VOICE_ID = "nmmIJ8k3ukOa1CSFlor3";
+const ELEVENLABS_TTS_URL = `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`;
 
 type TtsVariant = "normal" | "slow";
 
@@ -38,17 +40,30 @@ app.get("/tts", async (c) => {
 		return new Response(cached.body, { headers });
 	}
 
-	const elevenlabs = new ElevenLabsClient({ apiKey: c.env.ELEVENLABS_API_KEY });
-	const audioStream = await elevenlabs.textToSpeech.convert("nmmIJ8k3ukOa1CSFlor3", {
-		modelId: variant === "slow" ? "eleven_multilingual_v2" : "eleven_v3",
-		text: text.trim(),
-		outputFormat: "mp3_44100_128",
-		voiceSettings: {
-			speed: variant === "slow" ? 0.7 : 1,
-		}
-	});
+	const ttsResponse = await fetch(
+		`${ELEVENLABS_TTS_URL}?output_format=mp3_44100_128`,
+		{
+			method: "POST",
+			headers: {
+				"xi-api-key": c.env.ELEVENLABS_API_KEY,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				model_id: variant === "slow" ? "eleven_multilingual_v2" : "eleven_v3",
+				text: text.trim(),
+				voice_settings: {
+					speed: variant === "slow" ? 0.7 : 1,
+				},
+			}),
+		},
+	);
 
-	const buffer = await new Response(audioStream as unknown as ReadableStream).arrayBuffer();
+	if (!ttsResponse.ok) {
+		const errBody = await ttsResponse.text();
+		return c.json({ error: `ElevenLabs API error: ${ttsResponse.status} ${errBody}` }, 502);
+	}
+
+	const buffer = await ttsResponse.arrayBuffer();
 
 	await c.env.VOICE_BUCKET.put(key, buffer, {
 		httpMetadata: { contentType: "audio/mpeg" },

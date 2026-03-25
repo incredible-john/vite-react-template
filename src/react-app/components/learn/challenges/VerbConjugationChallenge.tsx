@@ -188,19 +188,3 @@ export function VerbConjugationChallenge({ challenge, onAnswer, answered }: Verb
 		</div>
 	);
 }
-
-export function getVerbConjugationCorrectAnswer(challenge: Challenge): string {
-	const chinese: ChallengeOption[] = [];
-	const english: ChallengeOption[] = [];
-	challenge.options.forEach((opt) => {
-		if (isChinese(opt.text)) {
-			chinese.push(opt);
-		} else {
-			english.push(opt);
-		}
-	});
-	return chinese
-		.map((c, i) => `${c.text}=${english[i].text}`)
-		.sort()
-		.join(",");
-}

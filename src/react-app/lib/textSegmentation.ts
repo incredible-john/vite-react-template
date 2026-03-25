@@ -1,20 +1,23 @@
+import type { LanguageCode } from "./types";
+
 export type ParsedWordPiece = { type: "word" | "space"; value: string };
 
-const WORD_SEGMENTER_LOCALE = "en";
+const cachedWordSegmenters = new Map<LanguageCode, Intl.Segmenter | null>();
 
-let cachedWordSegmenter: Intl.Segmenter | null | undefined;
-
-function getWordSegmenter(): Intl.Segmenter | null {
-	if (cachedWordSegmenter !== undefined) {
-		return cachedWordSegmenter;
+function getWordSegmenter(locale: LanguageCode): Intl.Segmenter | null {
+	if (cachedWordSegmenters.has(locale)) {
+		return cachedWordSegmenters.get(locale) ?? null;
 	}
 
-	cachedWordSegmenter =
+	console.log("getting word segmenter for locale:", locale);
+
+	const segmenter =
 		typeof Intl !== "undefined" && typeof Intl.Segmenter === "function"
-			? new Intl.Segmenter(WORD_SEGMENTER_LOCALE, { granularity: "word" })
+			? new Intl.Segmenter(locale, { granularity: "word" })
 			: null;
 
-	return cachedWordSegmenter;
+	cachedWordSegmenters.set(locale, segmenter);
+	return segmenter;
 }
 
 function segmentTextWhitespaceFallback(text: string): ParsedWordPiece[] {
@@ -48,8 +51,8 @@ function segmentTextWhitespaceFallback(text: string): ParsedWordPiece[] {
 	return result;
 }
 
-export function segmentText(text: string): ParsedWordPiece[] {
-	const segmenter = getWordSegmenter();
+export function segmentText(text: string, locale: LanguageCode = "en"): ParsedWordPiece[] {
+	const segmenter = getWordSegmenter(locale);
 
 	if (!segmenter) {
 		return segmentTextWhitespaceFallback(text);
@@ -68,8 +71,8 @@ export function segmentText(text: string): ParsedWordPiece[] {
 	return result;
 }
 
-export function extractWords(text: string): string[] {
-	return segmentText(text)
+export function extractWords(text: string, locale: LanguageCode = "en"): string[] {
+	return segmentText(text, locale)
 		.filter((piece) => piece.type === "word")
 		.map((piece) => piece.value);
 }
