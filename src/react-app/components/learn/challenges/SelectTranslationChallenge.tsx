@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
 import { playTts, stopTts } from "@/lib/sounds";
 import { segmentText } from "@/lib/textSegmentation";
+import { getChallengeSourceLang, getChallengeTargetLang } from "@/lib/challengeLanguages";
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -29,6 +30,8 @@ export function SelectTranslationChallenge({
 	answered,
 }: SelectTranslationChallengeProps) {
 	const [selectedId, setSelectedId] = useState<number | null>(null);
+	const sourceLang = getChallengeSourceLang(challenge);
+	const targetLang = getChallengeTargetLang(challenge);
 
 	// Shuffle options randomly
 	const shuffledOptions = useMemo(
@@ -38,11 +41,12 @@ export function SelectTranslationChallenge({
 
 	const selectedOption = shuffledOptions.find((o) => o.id === selectedId);
 
-	// Auto-play question audio on mount
+	// Auto-play question audio on mount (skip for Chinese source)
 	useEffect(() => {
+		if (sourceLang === "zh") return;
 		playTts(`/api/audio/tts?text=${encodeURIComponent(challenge.question)}`);
 		return () => stopTts();
-	}, [challenge.question]);
+	}, [challenge.question, sourceLang]);
 
 	// Render text with interactive words
 	const renderInteractiveText = (text: string) => {
@@ -51,7 +55,7 @@ export function SelectTranslationChallenge({
 			if (item.type === "space") {
 				return <span key={idx}>{item.value}</span>;
 			}
-			return <InteractiveWord key={idx} word={item.value} className="text-base font-medium" />;
+			return <InteractiveWord key={idx} word={item.value} className="text-base font-medium" sourceLang={sourceLang} targetLang={targetLang} playAudioOnClick={sourceLang !== "zh"} />;
 		});
 	};
 
@@ -67,7 +71,7 @@ export function SelectTranslationChallenge({
 						<div className="w-12 h-16 rounded-t-full bg-duo-orange/60" />
 					</div>
 					<div className="flex items-center gap-2 bg-white border-2 border-border rounded-2xl px-4 py-3 shadow-sm">
-						<AudioButton text={challenge.question} size="sm" />
+						{sourceLang !== "zh" && <AudioButton text={challenge.question} size="sm" />}
 						<span className="text-base font-medium">{renderInteractiveText(challenge.question)}</span>
 					</div>
 				</div>

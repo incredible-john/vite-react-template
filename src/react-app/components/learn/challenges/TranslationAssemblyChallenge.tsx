@@ -149,7 +149,7 @@ export function TranslationAssemblyChallenge({ challenge, onAnswer, answered }: 
 						<div className="w-12 h-16 rounded-t-full bg-duo-purple/60" />
 					</div>
 					<div className="flex items-center gap-2 bg-white border-2 border-border rounded-2xl px-4 py-3 shadow-sm relative">
-						<AudioButton text={challenge.question} size="sm" />
+						{sourceLang !== "zh" && <AudioButton text={challenge.question} size="sm" />}
 						<span className="text-base font-medium">{renderParsedQuestion}</span>
 					</div>
 				</div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Challenge } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckButton } from "./CheckButton";
@@ -23,18 +23,22 @@ export function SingleSelectChallenge({
 	onAnswer,
 	answered,
 }: SingleSelectChallengeProps) {
-	const [selectedId, setSelectedId] = useState<number | null>(null);
+	const [selectionState, setSelectionState] = useState<{
+		challengeId: Challenge["id"];
+		selectedId: number | null;
+	}>({
+		challengeId: challenge.id,
+		selectedId: null,
+	});
 
 	const shuffledOptions = useMemo(
 		() => shuffleArray(challenge.options),
 		[challenge.options]
 	);
 
+	const selectedId =
+		selectionState.challengeId === challenge.id ? selectionState.selectedId : null;
 	const selectedOption = shuffledOptions.find((option) => option.id === selectedId);
-
-	useEffect(() => {
-		setSelectedId(null);
-	}, [challenge.id]);
 
 	return (
 		<div className="flex flex-col flex-1">
@@ -58,7 +62,13 @@ export function SingleSelectChallenge({
 					<button
 						key={option.id}
 						type="button"
-						onClick={() => !answered && setSelectedId(option.id)}
+						onClick={() =>
+							!answered &&
+							setSelectionState({
+								challengeId: challenge.id,
+								selectedId: option.id,
+							})
+						}
 						disabled={answered}
 						className={cn(
 							"w-full rounded-2xl border-2 px-5 py-4 text-left text-base font-medium transition-all",

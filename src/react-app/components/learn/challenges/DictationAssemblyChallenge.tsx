@@ -23,10 +23,6 @@ interface DictationAssemblyChallengeProps {
 	answered: boolean;
 }
 
-function getQuestionTokens(question: string): string[] {
-	return extractWords(question);
-}
-
 export function DictationAssemblyChallenge({
 	challenge,
 	onAnswer,
@@ -34,14 +30,39 @@ export function DictationAssemblyChallenge({
 }: DictationAssemblyChallengeProps) {
 	const [selected, setSelected] = useState<number[]>([]);
 
-	const orderedTokens = useMemo(() => getQuestionTokens(challenge.question), [challenge.question]);
+	const orderedQuestionTokens = useMemo(
+		() => extractWords(challenge.question),
+		[challenge.question]
+	);
+
+	// Combine question tokens (correct words) with option distractors into one word bank.
+	// Question tokens get orders 0..N-1; option distractors get orders N..N+M-1.
+	const allWordBankItems = useMemo(() => {
+		const questionItems = orderedQuestionTokens.map((text, order) => ({
+			id: `${challenge.id}-q-${order}-${text}`,
+			text,
+			order,
+		}));
+
+		if (challenge.options.length === 0) return questionItems;
+
+		const baseOrder = orderedQuestionTokens.length;
+		const optionItems = challenge.options.map((opt, i) => ({
+			id: `${challenge.id}-o-${i}-${opt.text}`,
+			text: opt.text,
+			order: baseOrder + i,
+		}));
+
+		return [...questionItems, ...optionItems];
+	}, [challenge.id, challenge.options, orderedQuestionTokens]);
+
 	const tokenByOrder = useMemo(
-		() => new Map(orderedTokens.map((token, index) => [index, token])),
-		[orderedTokens]
+		() => new Map(allWordBankItems.map((item) => [item.order, item.text])),
+		[allWordBankItems]
 	);
 	const shuffledTokens = useMemo(
-		() => shuffleArray(orderedTokens.map((text, order) => ({ id: `${challenge.id}-${order}-${text}`, text, order }))),
-		[challenge.id, orderedTokens]
+		() => shuffleArray(allWordBankItems),
+		[allWordBankItems]
 	);
 
 	useEffect(() => {
