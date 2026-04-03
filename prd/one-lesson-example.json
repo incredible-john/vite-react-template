@@ -1,0 +1,386 @@
+{
+  "title": "Lesson 1",
+  "challenges": [
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "man",
+      "translation": "男人",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "milk", "isCorrect": false },
+        { "text": "map", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "there",
+      "translation": "那里；那儿",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "three", "isCorrect": false },
+        { "text": "then", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "once",
+      "translation": "曾经；一次",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "贫穷的", "isCorrect": false },
+        { "text": "男人", "isCorrect": false },
+        { "text": "曾经；一次", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "there",
+      "translation": "那里；那儿",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "贫穷的", "isCorrect": false },
+        { "text": "男人", "isCorrect": false },
+        { "text": "那里；那儿", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "poor",
+      "translation": "贫穷的",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "居住", "isCorrect": false },
+        { "text": "男人", "isCorrect": false },
+        { "text": "贫穷的", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "居住；生活",
+      "translation": "live",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "man", "isCorrect": false },
+        { "text": "poor", "isCorrect": false },
+        { "text": "live", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "poor",
+      "translation": "贫穷的",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "door", "isCorrect": false },
+        { "text": "pour", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "once",
+      "translation": "曾经；一次",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "one", "isCorrect": false },
+        { "text": "nice", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "曾经；一次",
+      "translation": "once",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "poor", "isCorrect": false },
+        { "text": "village", "isCorrect": false },
+        { "text": "once", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "贫穷的",
+      "translation": "poor",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "man", "isCorrect": false },
+        { "text": "village", "isCorrect": false },
+        { "text": "poor", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "男人",
+      "translation": "man",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "poor", "isCorrect": false },
+        { "text": "live", "isCorrect": false },
+        { "text": "man", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "village",
+      "translation": "村庄",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "villiage", "isCorrect": false },
+        { "text": "villige", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "village",
+      "translation": "村庄",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "贫穷的", "isCorrect": false },
+        { "text": "居住", "isCorrect": false },
+        { "text": "村庄", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "live",
+      "translation": "居住",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "曾经；一次", "isCorrect": false },
+        { "text": "贫穷的", "isCorrect": false },
+        { "text": "居住", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "那里；那儿",
+      "translation": "there",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "once", "isCorrect": false },
+        { "text": "village", "isCorrect": false },
+        { "text": "there", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "live",
+      "translation": "居住",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "love", "isCorrect": false },
+        { "text": "leave", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "村庄",
+      "translation": "village",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [
+        { "text": "poor", "isCorrect": false },
+        { "text": "live", "isCorrect": false },
+        { "text": "village", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "SELECT_TRANSLATION",
+      "question": "man",
+      "translation": "男人",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "曾经；一次", "isCorrect": false },
+        { "text": "村庄", "isCorrect": false },
+        { "text": "男人", "isCorrect": true }
+      ]
+    },
+    {
+      "type": "MATCH_PAIRS",
+      "question": "Match the English words with their Chinese translations.",
+      "sentence": null,
+      "translation": null,
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "once", "isCorrect": true },
+        { "text": "曾经；一次", "isCorrect": true },
+        { "text": "live", "isCorrect": true },
+        { "text": "居住", "isCorrect": true },
+        { "text": "poor", "isCorrect": true },
+        { "text": "贫穷的", "isCorrect": true },
+        { "text": "man", "isCorrect": true },
+        { "text": "男人", "isCorrect": true },
+        { "text": "village", "isCorrect": true },
+        { "text": "村庄", "isCorrect": true }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "SINGLE_SELECT",
+      "question": "lived 的原形是？",
+      "options": [
+        { "text": "lives", "isCorrect": false },
+        { "text": "live", "isCorrect": true },
+        { "text": "living", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "SINGLE_SELECT",
+      "question": "live 的过去式是？",
+      "options": [
+        { "text": "lives", "isCorrect": false },
+        { "text": "lived", "isCorrect": true },
+        { "text": "living", "isCorrect": false }
+      ]
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "在一个村庄里",
+      "sentence": null,
+      "translation": "in a village",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [],
+      "tokens": []
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "一个穷人",
+      "sentence": null,
+      "translation": "a poor man",
+      "sourceLang": "zh",
+      "targetLang": "en",
+      "options": [],
+      "tokens": []
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "in a village",
+      "sentence": null,
+      "translation": null,
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "在", "isCorrect": true },
+        { "text": "一个", "isCorrect": true },
+        { "text": "村庄里", "isCorrect": true },
+        { "text": "穷人", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "a poor man",
+      "translation": "一个穷人",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "village", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "in a village",
+      "translation": "在一个村庄里",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "man", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "a poor man",
+      "sentence": null,
+      "translation": null,
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "一个", "isCorrect": true },
+        { "text": "穷人", "isCorrect": true },
+        { "text": "一只鹅", "isCorrect": false },
+        { "text": "村庄", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "There once lived a poor man.",
+      "sentence": null,
+      "translation": null,
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "从前", "isCorrect": true },
+        { "text": "有", "isCorrect": true },
+        { "text": "一个", "isCorrect": true },
+        { "text": "穷人", "isCorrect": true },
+        { "text": "富人", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "There once lived a poor man",
+      "translation": "从前一个穷人住在一个村庄里。",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "rich", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "TRANSLATE",
+      "question": "There once lived a poor man in a village.",
+      "sentence": null,
+      "translation": null,
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [
+        { "text": "从前", "isCorrect": true },
+        { "text": "有", "isCorrect": true },
+        { "text": "一个", "isCorrect": true },
+        { "text": "穷人", "isCorrect": true },
+        { "text": "住在", "isCorrect": true },
+        { "text": "村子里", "isCorrect": true },
+        { "text": "鹅", "isCorrect": false }
+      ],
+      "tokens": []
+    },
+    {
+      "type": "DICTATION_ASSEMBLY",
+      "question": "There once lived a poor man in a village",
+      "translation": "从前有一个穷人住在一个村庄里。",
+      "sourceLang": "en",
+      "targetLang": "zh",
+      "options": [],
+      "tokens": []
+    }
+  ]
+}

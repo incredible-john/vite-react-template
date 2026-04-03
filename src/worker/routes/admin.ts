@@ -2,7 +2,13 @@ import { Hono } from "hono";
 import { eq, asc } from "drizzle-orm";
 import { getDb } from "../../db";
 import * as schema from "../../db/schema";
-import { importUnitFromPayload, ImportUnitError, type UnitImportBody } from "../lib/importUnit";
+import {
+	importUnitFromPayload,
+	importLessonFromPayload,
+	ImportUnitError,
+	type UnitImportBody,
+	type LessonImportBody,
+} from "../lib/importUnit";
 
 type ChallengeWithChildren = typeof schema.challenges.$inferSelect & {
 	options: (typeof schema.challengeOptions.$inferSelect)[];
@@ -117,6 +123,35 @@ app.post("/units/import", async (c) => {
 	try {
 		const unit = await importUnitFromPayload(db, body as UnitImportBody);
 		return c.json({ unit }, 201);
+	} catch (e) {
+		if (e instanceof ImportUnitError) {
+			return c.json({ error: e.message }, e.status);
+		}
+		throw e;
+	}
+});
+
+/**
+ * Import a single lesson into an existing unit.
+ * node scripts/import-lesson.mjs <path-to-lesson.json> --unitId=<id>
+ */
+app.post("/units/:unitId/lessons/import", async (c) => {
+	const unitId = Number(c.req.param("unitId"));
+	if (!Number.isFinite(unitId) || unitId <= 0) {
+		return c.json({ error: "Invalid unitId" }, 400);
+	}
+
+	const db = getDb(c.env.DB);
+	let body: unknown;
+	try {
+		body = await c.req.json();
+	} catch {
+		return c.json({ error: "Invalid JSON body" }, 400);
+	}
+
+	try {
+		const lesson = await importLessonFromPayload(db, unitId, body as LessonImportBody);
+		return c.json({ lesson }, 201);
 	} catch (e) {
 		if (e instanceof ImportUnitError) {
 			return c.json({ error: e.message }, e.status);
