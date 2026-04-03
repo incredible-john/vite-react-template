@@ -336,7 +336,13 @@ export default function AdminPage() {
 		}
 	}
 
-	const challengeTypes: ChallengeType[] = ["TRANSLATE", "FILL_BLANK", "MATCH_PAIRS", "SELECT_TRANSLATION"];
+	const challengeTypes: ChallengeType[] = [
+		"TRANSLATE",
+		"FILL_BLANK",
+		"MATCH_PAIRS",
+		"SELECT_TRANSLATION",
+		"SINGLE_SELECT",
+	];
 
 	return (
 		<div className="min-h-screen bg-background">

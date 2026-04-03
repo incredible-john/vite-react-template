@@ -63,6 +63,7 @@ export type ChallengeType =
 	| "FILL_BLANK"
 	| "MATCH_PAIRS"
 	| "SELECT_TRANSLATION"
+	| "SINGLE_SELECT"
 	| "VERB_CONJUGATION"
 	| "DICTATION_ASSEMBLY";
 

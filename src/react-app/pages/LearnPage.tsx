@@ -5,6 +5,7 @@ import { DictationAssemblyChallenge } from "@/components/learn/challenges/Dictat
 import { FeedbackBanner } from "@/components/learn/challenges/FeedbackBanner";
 import { FillBlankChallenge } from "@/components/learn/challenges/FillBlankChallenge";
 import { MatchPairsChallenge } from "@/components/learn/challenges/MatchPairsChallenge";
+import { SingleSelectChallenge } from "@/components/learn/challenges/SingleSelectChallenge";
 import { SelectTranslationChallenge } from "@/components/learn/challenges/SelectTranslationChallenge";
 import { TranslationAssemblyChallenge } from "@/components/learn/challenges/TranslationAssemblyChallenge";
 import { VerbConjugationChallenge } from "@/components/learn/challenges/VerbConjugationChallenge";
@@ -180,6 +181,9 @@ export function LearnPage({ mockLesson }: LearnPageProps) {
 					)}
 					{current.type === "SELECT_TRANSLATION" && (
 						<SelectTranslationChallenge challenge={current} onAnswer={handleAnswer} answered={answered} />
+					)}
+					{current.type === "SINGLE_SELECT" && (
+						<SingleSelectChallenge challenge={current} onAnswer={handleAnswer} answered={answered} />
 					)}
 					{current.type === "VERB_CONJUGATION" && (
 						<VerbConjugationChallenge challenge={current} onAnswer={handleAnswer} answered={answered} />

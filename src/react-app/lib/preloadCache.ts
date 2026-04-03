@@ -115,30 +115,45 @@ export function preloadChallenges(challenges: Challenge[]): void {
 		for (const c of sorted) {
 			if (signal.aborted) return;
 
-			await preloadAudio(c.question, signal);
-			if (signal.aborted) return;
+			const sourceLang = getChallengeSourceLang(c);
+			const targetLang = getChallengeTargetLang(c);
+			const shouldPreloadQuestionAudio =
+				c.type !== "SINGLE_SELECT" &&
+				!(c.type === "TRANSLATE" && sourceLang === "zh");
+
+			if (shouldPreloadQuestionAudio) {
+				await preloadAudio(c.question, signal);
+				if (signal.aborted) return;
+			}
 
 			if (c.type === "DICTATION_ASSEMBLY") {
 				await preloadAudio(c.question, signal, "slow");
 				if (signal.aborted) return;
 			}
 
-			const sourceLang = getChallengeSourceLang(c);
-			const targetLang = getChallengeTargetLang(c);
-			console.log("source_lang:", sourceLang);
 			const words = extractWords(c.question, sourceLang);
-			for (const word of words) {
-				if (signal.aborted) return;
-				await preloadAudio(word, signal);
+
+			if (shouldPreloadQuestionAudio) {
+				for (const word of words) {
+					if (signal.aborted) return;
+					await preloadAudio(word, signal);
+				}
 			}
+
 			for (const word of words) {
 				if (signal.aborted) return;
 				await preloadTranslation(word, sourceLang, targetLang, signal);
 			}
 
-			for (const opt of getTranslationAssemblyWordBank(c)) {
-				if (signal.aborted) return;
-				await preloadAudio(opt.text, signal);
+			const shouldPreloadOptionAudio =
+				c.type !== "SINGLE_SELECT" &&
+				!(c.type === "TRANSLATE" && sourceLang === "zh");
+
+			if (shouldPreloadOptionAudio) {
+				for (const opt of getTranslationAssemblyWordBank(c)) {
+					if (signal.aborted) return;
+					await preloadAudio(opt.text, signal);
+				}
 			}
 		}
 	})();

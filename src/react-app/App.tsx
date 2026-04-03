@@ -6,7 +6,7 @@ import { UnitsPage } from "./pages/UnitsPage";
 import { LearnPage } from "./pages/LearnPage";
 import AdminPage from "./pages/AdminPage";
 import { setGetToken } from "./lib/api";
-import { translationAssemblyMockLesson } from "./lib/mockLessons";
+import { selectTranslationMockLesson } from "./lib/mockLessons";
 
 export default function App() {
 	const { getToken } = useAuth();
@@ -21,7 +21,7 @@ export default function App() {
 				<Route path="/" element={<SubjectsPage />} />
 				<Route path="/subjects/:id" element={<UnitsPage />} />
 				<Route path="/lessons/:id" element={<LearnPage />} />
-				<Route path="/test" element={<LearnPage mockLesson={translationAssemblyMockLesson} />} />
+				<Route path="/test" element={<LearnPage mockLesson={selectTranslationMockLesson} />} />
 				<Route path="/admin/*" element={<AdminPage />} />
 			</Routes>
 		</BrowserRouter>

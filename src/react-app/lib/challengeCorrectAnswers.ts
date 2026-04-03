@@ -46,6 +46,11 @@ function getSelectTranslationCorrectAnswer(challenge: Challenge): string {
 	return correct?.text ?? "";
 }
 
+function getSingleSelectCorrectAnswer(challenge: Challenge): string {
+	const correct = challenge.options.find((option) => option.isCorrect);
+	return correct?.text ?? "";
+}
+
 function getVerbConjugationCorrectAnswer(challenge: Challenge): string {
 	const chinese: ChallengeOption[] = [];
 	const english: ChallengeOption[] = [];
@@ -78,6 +83,8 @@ export function getChallengeCorrectAnswer(challenge: Challenge): string {
 			return getMatchPairsCorrectAnswer(challenge);
 		case "SELECT_TRANSLATION":
 			return getSelectTranslationCorrectAnswer(challenge);
+		case "SINGLE_SELECT":
+			return getSingleSelectCorrectAnswer(challenge);
 		case "VERB_CONJUGATION":
 			return getVerbConjugationCorrectAnswer(challenge);
 		case "DICTATION_ASSEMBLY":
