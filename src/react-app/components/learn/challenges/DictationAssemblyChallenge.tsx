@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Turtle } from "lucide-react";
 import type { Challenge } from "@/lib/types";
 import { AudioButton } from "../AudioButton";
 import { WordTile } from "../WordTile";
@@ -97,33 +96,12 @@ export function DictationAssemblyChallenge({
 			<div className="px-6 pt-4 pb-2">
 				<h2 className="text-lg font-bold text-foreground mb-4">Listen and build what you hear</h2>
 
-				<div className="rounded-3xl border-2 border-border bg-white px-5 py-5 shadow-sm mb-6">
-					<div className="flex items-center gap-3 mb-3">
-						<div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-duo-blue/10 text-duo-blue">
-							<Turtle size={24} />
-						</div>
-						<div>
-							<p className="text-sm font-semibold text-foreground">No text shown</p>
-							<p className="text-sm text-muted-foreground">Use the audio and assemble the sentence.</p>
-						</div>
+				<div className="flex justify-center gap-4 mb-6">
+					<div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-duo-blue/30 bg-duo-blue/5 px-6 py-4 shadow-sm">
+						<AudioButton text={challenge.question} size="md" />
 					</div>
-
-					<div className="grid grid-cols-2 gap-3">
-						<div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-border bg-muted/40 px-4 py-4">
-							<AudioButton text={challenge.question} size="md" />
-							<div className="text-center">
-								<p className="text-sm font-semibold text-foreground">Normal</p>
-								<p className="text-xs text-muted-foreground">Standard speed</p>
-							</div>
-						</div>
-
-						<div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-border bg-muted/40 px-4 py-4">
-							<AudioButton text={challenge.question} size="md" variant="slow" />
-							<div className="text-center">
-								<p className="text-sm font-semibold text-foreground">Slow</p>
-								<p className="text-xs text-muted-foreground">Slower playback</p>
-							</div>
-						</div>
+					<div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-duo-blue/30 bg-duo-blue/5 px-6 py-4 shadow-sm">
+						<AudioButton text={challenge.question} size="md" variant="slow" icon="turtle" />
 					</div>
 				</div>
 			</div>

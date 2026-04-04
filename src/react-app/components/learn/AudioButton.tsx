@@ -1,4 +1,4 @@
-import { Volume2 } from "lucide-react";
+import { Turtle, Volume2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { playTts } from "@/lib/sounds";
@@ -10,6 +10,7 @@ interface AudioButtonProps {
 	size?: "sm" | "md";
 	className?: string;
 	variant?: TtsVariant;
+	icon?: "volume" | "turtle";
 }
 
 export function AudioButton({
@@ -18,6 +19,7 @@ export function AudioButton({
 	size = "md",
 	className,
 	variant = "normal",
+	icon = "volume",
 }: AudioButtonProps) {
 	const [playing, setPlaying] = useState(false);
 
@@ -32,6 +34,7 @@ export function AudioButton({
 	};
 
 	const isDisabled = !audioUrl && !text;
+	const iconSize = size === "sm" ? 16 : 20;
 
 	return (
 		<button
@@ -44,7 +47,7 @@ export function AudioButton({
 				className
 			)}
 		>
-			<Volume2 size={size === "sm" ? 16 : 20} />
+			{icon === "turtle" ? <Turtle size={iconSize} /> : <Volume2 size={iconSize} />}
 		</button>
 	);
 }
